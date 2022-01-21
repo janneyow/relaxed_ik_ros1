@@ -1,8 +1,20 @@
 # Relaxed IK ROS1
 
+## Brief Overview
+This package is a ROS wrapper for RelaxedIK an CollisionIK. Joystick control has been added in this package.
+- To test this package, first install all the [dependencies](#dependencies) and following instructions in [getting started](#getting-started).
+- The default robot is the Kinova Jaco arm. Install the ros package [here](https://github.com/Kinovarobotics/kinova-ros).
+- To teleop the robot with joystick, ensure you have the Joy package.
+```bash
+sudo apt-get install ros-$ROS_DISTRO-joy
+```
+- Note: you do not need to install [relaxed_ik](https://github.com/janneyow/relaxed_ik.git) if you do not need to configure a new arm.
+
+
+
 ## Introduction
 
-You can find an introduction and the citation information of RelaxedIK in the README of [RelaxedIK Core](https://github.com/uwgraphics/relaxed_ik_core) which is a submodule of this repo. It is recommended to look at [RelaxedIK Core](https://github.com/uwgraphics/relaxed_ik_core) before working with this wrapper.
+You can find an introduction and the citation information of RelaxedIK in the README of [RelaxedIK Core](https://github.com/janneyow/relaxed_ik_core) which is a submodule of this repo. It is recommended to look at [RelaxedIK Core](https://github.com/janneyow/relaxed_ik_core) before working with this wrapper.
 
 Relaxed IK ROS1 has the complete set of features available in the Relaxed IK family and it is also where [CollisionIK](https://arxiv.org/abs/2102.13187) and Pathwise CollisionIK (In development) reside. If you doesn't have strong preferences over any specific wrapper, you probably should consider this ROS1 wrapper as the first choice. A keyboard pose goal driver and an rviz viewer are provided for driving the robot's end-effector around in a simulated environment. 
 
@@ -60,7 +72,7 @@ To use this wrapper, you will first need to install Rust. Please go to https://w
     git submodule update --init
     ``` 
 1. Navigate to the *relaxed_ik_core* folder and go through the steps below to get relaxed_ik_core ready.
-    1. If your robot is in this list: [baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, yumi], ignore this step. Else, you will need to clone [this repo](https://github.com/uwgraphics/relaxed_ik) and follow the step-by-step guide [there](https://github.com/uwgraphics/relaxed_ik/blob/dev/src/start_here.py) to get the required robot config files into corresponding folders in the *config* folder in the core. To specify, there should be (replace "sawyer" with your robot name or your urdf name in some cases):
+    1. If your robot is in this list: [baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, yumi], ignore this step. Else, you will need to clone [this repo](https://github.com/janneyow/relaxed_ik.git) and follow the step-by-step guide [there](https://github.com/uwgraphics/relaxed_ik/blob/dev/src/start_here.py) to get the required robot config files into corresponding folders in the *config* folder in the core. To specify, there should be (replace "sawyer" with your robot name or your urdf name in some cases):
         - 1 self-collision file <collision_sawyer.yaml> in the *collision_files* folder
         - 4 Rust neural network files <sawyer_nn, sawyer_nn.yaml, sawyer_nn_jointpoint, sawyer_nn_jointpoint.yaml> in the *collision_nn_rust* folder
         - 1 info file <sawyer_info.yaml> in the *info_files* folder
@@ -84,12 +96,12 @@ To use this wrapper, you will first need to install Rust. Please go to https://w
     rosparam set /simulation_time go
     ```
 
-1. **[Teleop with Joystick]** Change the input device to "joy" in <settings.yaml>. Launch the joystick controller in a new terminal. Current input mappings are mapped for an xbox controller.
+1. **[Teleop with Joystick for Testing]** Change the input device to "joy" in <settings.yaml>. Launch the joystick controller in a new terminal. Current input mappings are mapped for an xbox controller.
     ```bash
     rosrun relaxed_ik_ros1 ikgoal_driver.py
     ```
 
-1. **[For Testing purposes]** Control the robot based on the type of input device in <settings.yaml>. If you set the robot follow a given cartesian trajectories, you should see the robot moving now! Some examples of cartesian trajectories are provided in the folder *animation_files*. If you set the `input_device` to be keyboard, initialize the keyboard IK goal driver in a new terminal. The driver listens to 6-DOF pose goals and publishes robot joint angles.
+1. **[Teleop with Keyboard for Testing]** Control the robot based on the type of input device in <settings.yaml>. If you set the robot follow a given cartesian trajectories, you should see the robot moving now! Some examples of cartesian trajectories are provided in the folder *animation_files*. If you set the `input_device` to be keyboard, initialize the keyboard IK goal driver in a new terminal. The driver listens to 6-DOF pose goals and publishes robot joint angles.
     ```bash
     rosrun relaxed_ik_ros1 keyboard_ikgoal_driver.py
     ```
