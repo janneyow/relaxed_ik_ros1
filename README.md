@@ -83,6 +83,12 @@ To use this wrapper, you will first need to install Rust. Please go to https://w
     ```bash
     rosparam set /simulation_time go
     ```
+
+1. **[Teleop with Joystick]** Change the input device to "joy" in <settings.yaml>. Launch the joystick controller in a new terminal. Current input mappings are mapped for an xbox controller.
+    ```bash
+    rosrun relaxed_ik_ros1 ikgoal_driver.py
+    ```
+
 1. **[For Testing purposes]** Control the robot based on the type of input device in <settings.yaml>. If you set the robot follow a given cartesian trajectories, you should see the robot moving now! Some examples of cartesian trajectories are provided in the folder *animation_files*. If you set the `input_device` to be keyboard, initialize the keyboard IK goal driver in a new terminal. The driver listens to 6-DOF pose goals and publishes robot joint angles.
     ```bash
     rosrun relaxed_ik_ros1 keyboard_ikgoal_driver.py

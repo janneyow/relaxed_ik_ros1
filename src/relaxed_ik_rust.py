@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import csv
 import ctypes
@@ -102,15 +102,74 @@ def main(args=None):
         except KeyError:
             initialized = False
     print("ROS param /simulation_time is set up!\n")
-
+   
     # If the input_device is keyboard
+    global eepg
     if robot_info['input_device'] == 'keyboard': 
-        global eepg
         rospy.Subscriber('/relaxed_ik/ee_pose_goals', EEPoseGoals, eePoseGoals_cb)
 
-        print("Waiting for the keyboard_ikgoal_driver being initialized...")
+        print("Waiting for the keyboard_ikgoal_driver to be initialized...")
         while eepg == None: continue
         print("The keyboard_ikgoal_driver is initialized!\n")
+
+        rate = rospy.Rate(3000)
+        speed_list = []
+        while not rospy.is_shutdown():
+            cur_time_msg = Float64()
+            cur_time_msg.data = cur_time
+            time_pub.publish(cur_time_msg)
+            cur_time += delta_time * step
+
+            pose_goals = eepg.ee_poses
+            header = eepg.header
+            pos_arr = (ctypes.c_double * (3 * len(pose_goals)))()
+            quat_arr = (ctypes.c_double * (4 * len(pose_goals)))()
+
+            for i in range(len(pose_goals)):
+                p = pose_goals[i]
+                pos_arr[3*i] = p.position.x
+                pos_arr[3*i+1] = p.position.y
+                pos_arr[3*i+2] = p.position.z
+
+                quat_arr[4*i] = p.orientation.x
+                quat_arr[4*i+1] = p.orientation.y
+                quat_arr[4*i+2] = p.orientation.z
+                quat_arr[4*i+3] = p.orientation.w
+
+            start = timer()
+            xopt = lib.solve(pos_arr, len(pos_arr), quat_arr, len(quat_arr))
+            end = timer()
+            speed = 1.0 / (end - start)
+            # print("Speed: {}".format(speed))
+            speed_list.append(speed)
+
+            ja = JointAngles()
+            ja.header = header
+            ja_str = "["
+            for i in range(xopt.length):
+                ja.angles.data.append(xopt.data[i])
+                ja_str += str(xopt.data[i])
+                if i == xopt.length - 1:
+                    ja_str += "]"
+                else: 
+                    ja_str += ", "
+
+            angles_pub.publish(ja)
+            # print(ja_str)
+
+            rate.sleep()
+
+        print("Average speed: {} HZ".format(numpy.mean(speed_list)))
+        print("Min speed: {} HZ".format(numpy.min(speed_list)))
+        print("Max speed: {} HZ".format(numpy.max(speed_list)))
+    
+        # If the input_device is joystick
+    elif robot_info['input_device'] == 'joystick': 
+        rospy.Subscriber('/relaxed_ik/ee_pose_goals', EEPoseGoals, eePoseGoals_cb)
+
+        print("Waiting for the ikgoal_driver to be initialized...")
+        while eepg == None: continue
+        print("The ikgoal_driver is initialized!\n")
 
         rate = rospy.Rate(3000)
         speed_list = []
